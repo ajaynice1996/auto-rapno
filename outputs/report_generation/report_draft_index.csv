@@ -1,0 +1,2 @@
+case_id,report_path,report_status,report_structured_path
+demo_case_0001,/Users/ashar126/Documents/Development/Work/auto-rapno/outputs/report_generation/demo_case_0001_report_draft.txt,PASS,/Users/ashar126/Documents/Development/Work/auto-rapno/outputs/report_generation/demo_case_0001_report_structured.json

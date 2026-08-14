@@ -1,0 +1,2 @@
+case_id,edema_ml,enhancing_ml,max_diameter_vox,necrotic_ml,status,total_tumor_ml
+demo_case_0001,0.0,4.139,31.177,0.0,PASS,4.139

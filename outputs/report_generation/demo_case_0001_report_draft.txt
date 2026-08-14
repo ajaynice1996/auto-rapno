@@ -1,0 +1,9 @@
+Findings:
+- Intracranial tumor burden detected with total volume 4.14 mL.
+- Enhancing component volume 4.14 mL.
+- Edema component volume 0.00 mL.
+- Maximum lesion span (voxel-space) 31.18.
+
+Impression:
+- Auto-generated draft for radiologist review.
+- Clinical finalization required before diagnostic use.

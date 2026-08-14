@@ -1,0 +1,2 @@
+case_id,errors,flair_anisotropy,flair_shape,flair_spacing,qc_status,t1_anisotropy,t1_shape,t1_spacing,t1ce_anisotropy,t1ce_shape,t1ce_spacing,t2_anisotropy,t2_shape,t2_spacing,warnings
+demo_case_0001,,1.0,64x64x48,"1.000,1.000,1.000",PASS,1.0,64x64x48,"1.000,1.000,1.000",1.0,64x64x48,"1.000,1.000,1.000",1.0,64x64x48,"1.000,1.000,1.000",

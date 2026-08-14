@@ -1,0 +1,258 @@
+Pediatric Brain Tumor Agentic AI System (v2)
+
+Goal
+- Build an agentic AI pipeline for pediatric brain tumor MRI analysis and final report generation.
+- Phase 1: Agentic report generation from MRI + segmentation + report templates.
+- Phase 2: Train a multimodal model (MRI + segmentation + report) and compare model-generated reports vs agent-generated reports.
+
+-------------------------------------------------------------------------------
+WHAT CHANGED IN V2
+-------------------------------------------------------------------------------
+
+- Codebase is now organized by functionality under src/ (no separate phase1/step1 source trees).
+- Single primary execution entrypoint:
+  - src/agents/orchestrator.py
+- Dataset, intake, QC, registration, modality, segmentation, quantification, reports,
+  and evaluation are split into separate folders for readability and maintenance.
+
+-------------------------------------------------------------------------------
+ORGANIZED SOURCE STRUCTURE (IMPLEMENTED)
+-------------------------------------------------------------------------------
+
+auto-rapno/
+  src/
+    common/
+      io_utils.py
+
+    dataset/
+      create_manifest.py
+      validate_dataset.py
+      split_dataset.py
+      demo_data.py
+
+    intake/
+      identify_sequences.py
+      build_modality_inventory.py
+
+    image_qc/
+      geometry_qc.py
+      orientation_qc.py
+      intensity_qc.py
+
+    registration/
+      triage_registration.py
+      run_registration.py
+
+    modality/
+      detect_missing_contrast.py
+      build_synthesis_queue.py
+
+    segmentation/
+      run_inference.py
+
+    qc/
+      segmentation_qc.py
+
+    quantification/
+      extract_metrics.py
+
+    reports/
+      parse_reports.py
+      generate_report.py
+      validate_report.py
+
+    evaluation/
+      report_metrics.py
+      compare_systems.py
+
+    agents/
+      image_intake_agent.py
+      image_qc_agent.py
+      registration_triage_agent.py
+      modality_completeness_agent.py
+      segmentation_agent.py
+      qc_agent.py
+      quantification_agent.py
+      report_draft_agent.py
+      report_critic_agent.py
+      orchestrator.py
+
+-------------------------------------------------------------------------------
+DATA + OUTPUT STRUCTURE
+-------------------------------------------------------------------------------
+
+auto-rapno/
+  data/
+    raw/
+      pedbrats/
+        case_0001/
+          t1.nii.gz
+          t1ce.nii.gz
+          t2.nii.gz
+          flair.nii.gz
+          seg.nii.gz
+          report.txt
+    metadata/
+      master_manifest.csv
+      train_ids.txt
+      val_ids.txt
+      test_ids.txt
+      data_qc_report.csv
+    derived/
+      segmentations_pred/
+      registrations/
+      report_structured_labels.csv
+    processed/
+      mm_dataset/
+        train_manifest.csv
+        val_manifest.csv
+        test_manifest.csv
+
+  outputs/
+    image_intake/
+      modality_inventory.csv
+      case_modality_summary.json
+    image_qc/
+      image_qc_scores.csv
+      image_qc_failures.csv
+    modality_qc/
+      missing_contrast_flags.csv
+      synthesis_queue.csv
+    registration/
+      registration_triage.csv
+      transforms/
+    segmentation_qc/
+      seg_qc_scores.csv
+    quantification/
+      tumor_metrics.csv
+    report_generation/
+      case_0001_report_draft.txt
+      case_0001_report_structured.json
+      report_draft_index.csv
+    report_validation/
+      report_validation_results.csv
+    evaluation/
+      phase1_case_summary.csv
+      phase1_summary.json
+      phase2_agentic_vs_model_comparison.csv
+    models/
+      multimodal_report_model/
+
+-------------------------------------------------------------------------------
+PHASE 1: EXECUTION STEPS (RUNNABLE)
+-------------------------------------------------------------------------------
+
+Step 0. Environment setup
+- Create a local virtual environment and install minimum required packages.
+
+Commands
+- /opt/homebrew/bin/python3 -m venv .venv
+- .venv/bin/python -m pip install --upgrade pip
+- .venv/bin/python -m pip install nibabel numpy scipy
+
+Step 1. Build/refresh manifest
+- Build manifest from data_index.json.
+
+Command
+- .venv/bin/python -m src.dataset.create_manifest --index-json data_index.json --output-csv data/metadata/master_manifest.csv
+
+Output
+- data/metadata/master_manifest.csv
+
+Step 2. Validate manifest paths
+- Validate file existence from manifest rows.
+
+Command
+- .venv/bin/python -m src.dataset.validate_dataset --manifest-csv data/metadata/master_manifest.csv --output-csv data/metadata/data_qc_report.csv
+
+Output
+- data/metadata/data_qc_report.csv
+
+Step 3. Optional split IDs generation
+- Create train/val/test ID files if split column is assigned.
+
+Command
+- .venv/bin/python -m src.dataset.split_dataset --manifest-csv data/metadata/master_manifest.csv
+
+Outputs
+- data/metadata/train_ids.txt
+- data/metadata/val_ids.txt
+- data/metadata/test_ids.txt
+
+Step 4. Run full agentic baseline pipeline (recommended)
+- Runs intake -> image qc -> registration triage -> missing contrast flags -> segmentation ->
+  seg qc -> quantification -> report draft -> report validation -> summary.
+
+Demo command (no external data required)
+- .venv/bin/python -m src.agents.orchestrator --use-demo
+
+Real data command
+- .venv/bin/python -m src.agents.orchestrator --index-json data_index.json
+
+Key outputs
+- outputs/image_intake/modality_inventory.csv
+- outputs/image_qc/image_qc_scores.csv
+- outputs/registration/registration_triage.csv
+- outputs/modality_qc/missing_contrast_flags.csv
+- outputs/modality_qc/synthesis_queue.csv
+- outputs/segmentation_qc/seg_qc_scores.csv
+- outputs/quantification/tumor_metrics.csv
+- outputs/report_generation/report_draft_index.csv
+- outputs/report_validation/report_validation_results.csv
+- outputs/evaluation/phase1_case_summary.csv
+- outputs/evaluation/phase1_summary.json
+
+Step 5. Review results with radiologist workflow
+- Review draft reports and flags.
+- Track edits for future supervised fine-tuning and critic improvement.
+
+-------------------------------------------------------------------------------
+PHASE 2: TRAINING ROADMAP (NEXT)
+-------------------------------------------------------------------------------
+
+Step 6. Create multimodal training manifests
+- Build train/val/test manifests combining MRI paths + segmentation + structured report labels.
+
+Output target
+- data/processed/mm_dataset/train_manifest.csv
+- data/processed/mm_dataset/val_manifest.csv
+- data/processed/mm_dataset/test_manifest.csv
+
+Step 7. Train multimodal model
+- Train a model that maps MRI + segmentation (+ optional clinical features) to structured report targets,
+  then optional text generation.
+
+Output target
+- outputs/models/multimodal_report_model/
+
+Step 8. Compare systems
+- Compare:
+  - System A: Agentic pipeline output
+  - System B: Multimodal trained model output
+  - Reference: Radiologist report
+
+Output target
+- outputs/evaluation/phase2_agentic_vs_model_comparison.csv
+
+-------------------------------------------------------------------------------
+EXECUTION CHECKLIST (SHORT)
+-------------------------------------------------------------------------------
+
+1) Set up .venv
+2) Create master manifest
+3) Validate dataset paths
+4) Run orchestrator demo once
+5) Run orchestrator on real data
+6) Review Phase 1 outputs
+7) Prepare multimodal dataset
+8) Train multimodal model
+9) Compare agentic vs multimodal vs radiologist
+10) Iterate with human correction loop
+
+-------------------------------------------------------------------------------
+EXAMPLE: ONE-COMMAND START
+-------------------------------------------------------------------------------
+
+- .venv/bin/python -m src.agents.orchestrator --use-demo
+
+This will generate a complete demo run and produce all major output files in outputs/.

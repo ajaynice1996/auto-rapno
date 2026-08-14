@@ -1,0 +1,11 @@
+{
+  "case_id": "demo_case_0001",
+  "findings": {
+    "total_tumor_ml": 4.139,
+    "enhancing_ml": 4.139,
+    "edema_ml": 0.0,
+    "max_diameter_vox": 31.177
+  },
+  "impression": "Auto-generated draft for radiologist review.",
+  "guardrail": "Clinical finalization required before diagnostic use."
+}

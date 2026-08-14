@@ -1,0 +1,374 @@
+Pediatric Brain Tumor Agentic AI System
+
+Goal
+- Build an agentic AI pipeline for pediatric brain tumor MRI analysis and final report generation.
+- Phase 1: Agentic report generation from MRI + segmentation + report templates.
+- Phase 2: Train a multimodal model (MRI + segmentation + report) and compare model-generated reports vs agent-generated reports.
+
+-------------------------------------------------------------------------------
+STEP-BY-STEP PLAN
+-------------------------------------------------------------------------------
+
+Step 1. Lock scope and output format
+- Define the exact final report structure (sections and required fields).
+- Freeze one report template for the first baseline.
+- Mark all generated reports as decision support draft for radiologist review.
+
+Deliverable
+- report_schema.json with required fields:
+  - patient_id, study_date
+  - findings (location, compartments, edema, mass effect, midline shift)
+  - quantitative metrics (volumes, diameters)
+  - comparison (if prior exists)
+  - impression
+
+Step 2. Prepare dataset index and metadata
+- Keep raw MRI data in BraTS-like format.
+- Build one master manifest file with one row per study.
+- Add columns for available modalities, segmentation path, report path, and split.
+
+Deliverable
+- data/metadata/master_manifest.csv
+
+Step 2A. Add Initial Image Intake and Modality Identification Agents
+- Build an Image Intake Agent that reads each case folder and classifies sequences:
+  - T1
+  - T1 post-contrast (T1ce/T1pc)
+  - T2
+  - FLAIR
+  - Optional: DWI/ADC
+- Use filename + header metadata rules to identify sequence type.
+- Produce a modality presence map for every case.
+
+Deliverable
+- outputs/image_intake/modality_inventory.csv
+- outputs/image_intake/case_modality_summary.json
+
+Required columns in master_manifest.csv
+- case_id
+- patient_id
+- study_uid
+- split (train/val/test)
+- t1_path
+- t1ce_path
+- t2_path
+- flair_path
+- dwi_path (optional)
+- adc_path (optional)
+- seg_path (optional before inference)
+- report_txt_path (optional if not available)
+- prior_case_id (optional)
+- missing_required_modality_flag
+- missing_modality_list
+- registration_required_flag
+
+Step 3. Data quality checks
+- Validate all file paths exist.
+- Validate voxel spacing and orientation consistency.
+- Validate required modalities for each case.
+- Flag missing report or missing segmentation.
+
+Step 3A. Image Geometry and Acquisition QC Agent
+- Build an Image QC Agent to validate per-sequence image integrity:
+  - voxel spacing checks (anisotropy thresholds, extreme values)
+  - orientation checks (RAS/LPS consistency and axis flips)
+  - matrix size checks (unexpected dimensions)
+  - affine consistency checks across modalities
+  - intensity sanity checks (empty/near-empty scans)
+- Mark each case with PASS, WARN, or FAIL and attach reasons.
+
+Deliverable
+- outputs/image_qc/image_qc_scores.csv
+- outputs/image_qc/image_qc_failures.csv
+
+Step 3B. Alignment and Registration Requirement Agent
+- Build a Registration Triage Agent to determine if inter-modality alignment is sufficient.
+- Compute pre-registration alignment metrics (mutual information/correlation-based proxy).
+- Flag cases requiring registration before segmentation.
+- Route flagged cases to a registration step and store transform metadata.
+
+Deliverable
+- outputs/registration/registration_triage.csv
+- outputs/registration/transforms/ (when registration is performed)
+
+Step 3C. Missing Contrast Detection and Synthetic Placeholder Flags
+- Detect missing required contrasts (for example missing T1ce).
+- Add structured flags for future synthetic contrast generation integration.
+- Do not synthesize immediately in baseline; only triage and track.
+
+Deliverable
+- outputs/modality_qc/missing_contrast_flags.csv
+- outputs/modality_qc/synthesis_queue.csv
+
+Deliverable
+- data/metadata/data_qc_report.csv
+
+Step 4. Integrate your existing segmentation model
+- Plug your trained model as the segmentation engine.
+- Run inference for cases without masks.
+- Store generated masks in a separate predictions folder.
+- If registration_required_flag is true, run registration before segmentation.
+- If missing_required_modality_flag is true, either:
+  - route to review/exclusion in baseline mode, or
+  - route to future synthetic contrast pipeline mode.
+
+Deliverable
+- data/derived/segmentations_pred/
+
+Step 5. Segmentation QC agent
+- Build a QC module to score mask plausibility.
+- Check volume range, connected components, anatomical plausibility, and boundary smoothness.
+- Assign PASS, WARN, or FAIL per case.
+
+Deliverable
+- outputs/segmentation_qc/seg_qc_scores.csv
+
+Step 6. Quantification agent
+- Compute tumor metrics from segmentation:
+  - total volume
+  - enhancing volume
+  - non-enhancing/necrosis volume
+  - edema volume
+  - max 3D diameter
+  - centroid and laterality
+  - midline shift estimate if implemented
+
+Deliverable
+- outputs/quantification/tumor_metrics.csv
+
+Step 7. Report understanding from radiologist reports
+- Parse historical reports into structured labels using a fixed schema.
+- Normalize synonyms (for example, "mass effect" and "local mass effect").
+- Save structured targets for training and evaluation.
+
+Deliverable
+- data/derived/report_structured_labels.csv
+
+Step 8. Build Phase 1 agentic report generation pipeline
+- Create these agents:
+  1) Image Intake Agent: sequence identification and modality inventory
+  2) Image QC Agent: voxel/orientation/size/affine checks
+  3) Registration Triage Agent: alignment check and registration required flag
+  4) Modality Completeness Agent: detect missing contrasts and synthesis queue flag
+  5) Segmentation Agent: runs existing model
+  6) Segmentation QC Agent: validates masks
+  7) Quantification Agent: calculates biomarkers
+  8) Report Draft Agent: writes draft report from template
+  9) Validation/Critic Agent: checks numerical and anatomical consistency
+  10) Human Review Node: radiologist approves/edits
+
+Deliverable
+- One end-to-end script/workflow that takes case_id and returns:
+  - structured findings json
+  - draft report text
+  - validation flags
+  - qc and triage flags (missing modality, registration required)
+
+Step 9. Validation rules for report critic
+- Enforce hard checks:
+  - all numbers in report must match computed values within tolerance
+  - laterality must match segmentation location
+  - "stable/progression" statement must match longitudinal volume delta
+  - no claim of "no edema" when edema label is present
+
+Deliverable
+- outputs/report_validation/report_validation_results.csv
+
+Step 10. Phase 1 evaluation (Agentic reporting)
+- Compare generated report vs radiologist report.
+- Compute:
+  - section completeness
+  - factual consistency
+  - hallucination rate
+  - numeric error
+  - clinician edit distance/time (if available)
+
+Deliverable
+- outputs/evaluation/phase1_agentic_report_metrics.csv
+
+-------------------------------------------------------------------------------
+PHASE 2: MULTIMODAL MODEL TRAINING (MRI + SEGMENTATION + REPORT)
+-------------------------------------------------------------------------------
+
+Step 11. Build multimodal training dataset
+- Input modalities:
+  - MRI volumes (T1, T1ce, T2, FLAIR)
+  - Segmentation mask channels
+  - Optional tabular features (age, sex)
+- Target:
+  - structured report labels and/or report text.
+
+Deliverable
+- data/processed/mm_dataset/ with train/val/test manifest files
+
+Step 12. Train multimodal report model
+- Start with structured output prediction first (classification/regression targets).
+- Then add report text generation conditioned on predicted structured labels.
+- Keep the same report schema used in Phase 1.
+
+Deliverable
+- outputs/models/multimodal_report_model/
+
+Step 13. Compare two systems (required comparison step)
+- System A: Agentic pipeline report (Phase 1)
+- System B: Multimodal model report (Phase 2)
+- Compare against radiologist report as reference.
+
+Primary comparison metrics
+- factual accuracy
+- numerical accuracy
+- anatomical correctness
+- hallucination rate
+- completeness score
+- radiologist preference/blinded scoring if possible
+
+Deliverable
+- outputs/evaluation/phase2_agentic_vs_model_comparison.csv
+- outputs/evaluation/summary_tables.md
+
+Step 14. Human-in-the-loop learning cycle
+- Capture radiologist corrections on both systems.
+- Add corrections back into training data.
+- Retrain periodically and monitor improvement over time.
+
+Deliverable
+- data/feedback/radiologist_edits.csv
+
+-------------------------------------------------------------------------------
+RECOMMENDED DATA FOLDER STRUCTURE
+-------------------------------------------------------------------------------
+
+auto-rapno/
+  data/
+    raw/
+      pedbrats/
+        case_0001/
+          t1.nii.gz
+          t1ce.nii.gz
+          t2.nii.gz
+          flair.nii.gz
+          seg.nii.gz                # if ground truth exists
+          report.txt                # if report exists for this study
+        case_0002/
+          ...
+    metadata/
+      master_manifest.csv
+      train_ids.txt
+      val_ids.txt
+      test_ids.txt
+      data_qc_report.csv
+    derived/
+      segmentations_pred/
+        case_0001_seg_pred.nii.gz
+      report_structured_labels.csv
+      registrations/
+        case_0001/
+          t1_to_flair.mat
+    processed/
+      mm_dataset/
+        train_manifest.csv
+        val_manifest.csv
+        test_manifest.csv
+
+  outputs/
+    image_intake/
+      modality_inventory.csv
+      case_modality_summary.json
+    image_qc/
+      image_qc_scores.csv
+      image_qc_failures.csv
+    modality_qc/
+      missing_contrast_flags.csv
+      synthesis_queue.csv
+    registration/
+      registration_triage.csv
+      transforms/
+    segmentation_qc/
+      seg_qc_scores.csv
+    quantification/
+      tumor_metrics.csv
+    report_generation/
+      case_0001_report_draft.txt
+      case_0001_report_structured.json
+    report_validation/
+      report_validation_results.csv
+    evaluation/
+      phase1_agentic_report_metrics.csv
+      phase2_agentic_vs_model_comparison.csv
+      summary_tables.md
+    models/
+      multimodal_report_model/
+
+  src/
+    dataset/
+      create_manifest.py
+      validate_dataset.py
+      split_dataset.py
+    intake/
+      identify_sequences.py
+      build_modality_inventory.py
+    image_qc/
+      geometry_qc.py
+      orientation_qc.py
+      intensity_qc.py
+    registration/
+      triage_registration.py
+      run_registration.py
+    modality/
+      detect_missing_contrast.py
+      build_synthesis_queue.py
+    segmentation/
+      run_inference.py
+    qc/
+      segmentation_qc.py
+    quantification/
+      extract_metrics.py
+    reports/
+      parse_reports.py
+      generate_report.py
+      validate_report.py
+    agents/
+      image_intake_agent.py
+      image_qc_agent.py
+      registration_triage_agent.py
+      modality_completeness_agent.py
+      segmentation_agent.py
+      qc_agent.py
+      quantification_agent.py
+      report_draft_agent.py
+      report_critic_agent.py
+      orchestrator.py
+    multimodal/
+      dataset.py
+      train.py
+      infer.py
+    evaluation/
+      report_metrics.py
+      compare_systems.py
+
+-------------------------------------------------------------------------------
+EXECUTION ORDER (SHORT CHECKLIST)
+-------------------------------------------------------------------------------
+
+1) Finalize report schema and template
+2) Build master manifest
+3) Run data QC
+4) Run segmentation model
+5) Run segmentation QC
+6) Run quantification
+7) Parse radiologist reports into structured labels
+8) Run agentic report generation
+9) Run report critic validation
+10) Evaluate against radiology reports (Phase 1)
+11) Prepare multimodal dataset
+12) Train multimodal report model
+13) Compare Agentic vs Multimodal vs Radiologist (Phase 2)
+14) Collect human corrections and iterate
+
+-------------------------------------------------------------------------------
+NOTES FOR YOUR CURRENT STATUS
+-------------------------------------------------------------------------------
+
+- You can start immediately with Phase 1 using your existing segmentation model.
+- When your PedBraTS-like dataset upload is complete, first populate data/raw/pedbrats/ and update master_manifest.csv.
+- Keep train/val/test split fixed for fair comparison between Agentic and Multimodal systems.
