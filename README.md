@@ -1,4 +1,4 @@
-# aut-rapno
+# auto-rapno
 
 Agentic AI implementation of the RAPNO-directed image analysis
 
