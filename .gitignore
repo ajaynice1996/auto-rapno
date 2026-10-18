@@ -227,5 +227,16 @@ ENV/
 
 *.h5
 *.keras
+*.json
+
+**/nnUNet_preprocessed/
+**/*.b2nd
 
 
+# Generated nnU-Net data and model checkpoints
+**/nnUNet_raw/
+**/nnUNet_results/
+**/checkpoints/
+**/*.pth
+**/*.pt
+**/*.ckpt
