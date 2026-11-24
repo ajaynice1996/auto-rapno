@@ -1,0 +1,2 @@
+Model,Label1_Dice,Label2_Dice,Label3_Dice,Label4_Dice,TC_Dice,WT_Dice
+nnUNetTrainerSegResNet_100epochs__nnUNetPlans__3d_fullres,0.4907,0.7208,0.1718,0.1204,0.8468,0.879

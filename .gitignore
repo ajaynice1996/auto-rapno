@@ -259,3 +259,11 @@ nnUNet_preprocessed/*
 */nnUNet_results/*
 nnUNet_raw_data/*
 */nnUNet_results_*/*med-sam-brain/Miniconda3-latest-Linux-x86_64.sh
+**/.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+med-sam-brain/Miniconda3-latest-Linux-x86_64.sh

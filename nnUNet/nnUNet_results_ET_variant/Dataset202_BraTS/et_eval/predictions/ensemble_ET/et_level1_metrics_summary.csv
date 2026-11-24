@@ -1,0 +1,2 @@
+num_cases,mean_dice,std_dice,mean_iou,std_iou,mean_hd95_mm,std_hd95_mm,hd95_nan_cases,missing_gt_cases,source_a,source_b,ensemble_rule
+52,0.6429795643251851,0.37238025050136675,0.5699590815244602,0.35492974363797564,3.763542869352976,6.502656634137927,10,0,nnUNet_results/Dataset202_BraTS/nnUNetTrainer_500epochs__nnUNetResEncUNetLPlans__3d_fullres/fold_2/validation,nnUNet_results_ET_variant/Dataset202_BraTS/et_eval/predictions/nnUNet_PrimusV3S_Trainer__nnUNetResEncUNetLPlans__3d_fullres,ET union (two-model vote with tie=>positive)

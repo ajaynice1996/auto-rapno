@@ -1,0 +1,2 @@
+label,severity,issue
+ALL,info,"Observed GT levels=[0, 1, 2, 3, 4], Pred levels=[0, 1, 2, 3, 4]"

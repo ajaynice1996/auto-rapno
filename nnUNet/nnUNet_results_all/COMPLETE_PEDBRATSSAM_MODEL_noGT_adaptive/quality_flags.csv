@@ -1,0 +1,8 @@
+severity,issue
+info,labels_folder_used=nnUNet_raw/Dataset202_BraTS/labelsTr_all
+info,common_cases=52
+info,"observed_gt_levels=[0, 1, 2, 3, 4]"
+info,"observed_pred_levels=[0, 1, 2, 3, 4]"
+info,metric_policy=both_empty->1; one_empty->0
+info,noGT_adaptive_policy=variation_based_union_vs_intersection_without_using_GT_for_selection
+info,"variation_thresholds={'ET': 0.18, 'NET': 0.28, 'CC': 0.28, 'ED': 0.18, 'TC': 0.34, 'WT': 0.4}"

@@ -1,0 +1,7 @@
+label,ensemble,n_models,rule,n_cases,Dice,IoU,both_empty_cases,one_empty_cases
+CC,ResEncL+MedNeXt_k3_raw,2,intersection,52,0.6439337162939578,0.6159889709156688,25,12
+ED,MedNeXt_k5_raw+MedNeXt_k5_pp,2,intersection,52,0.6824836982479549,0.6509837434736134,29,11
+ET,ResEncL+MedNeXt_k5_raw,2,intersection,52,0.6559594598066456,0.5902448403758567,10,8
+NET,MedNeXt_k3_raw+MedNeXt_k3_pp,2,intersection,52,0.7474634744192608,0.657627891434917,0,0
+TC,MedNeXt_k3_raw+MedNeXt_k3_pp,2,intersection,52,0.8758253567285691,0.7998420778398183,0,0
+WT,MedNeXt_k3_raw+MedNeXt_k3_pp,2,intersection,52,0.9046878235056398,0.8350175483781567,0,0

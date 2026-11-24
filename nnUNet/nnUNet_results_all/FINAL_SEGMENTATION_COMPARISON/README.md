@@ -1,0 +1,8 @@
+# FINAL_SEGMENTATION_COMPARISON
+
+Files:
+- comparison_noGT_vs_oracle_per_label.csv
+- comparison_noGT_vs_oracle_publishable.txt
+
+noGT source: nnUNet_results_all/FINAL_SEGMENTATION_RECOMMENDED/reports/metrics_summary.csv
+oracle source: nnUNet_results_all/FINAL_SEGMENTATION_ADAPTIVE_ET73_ORACLE/reports/metrics_summary.csv

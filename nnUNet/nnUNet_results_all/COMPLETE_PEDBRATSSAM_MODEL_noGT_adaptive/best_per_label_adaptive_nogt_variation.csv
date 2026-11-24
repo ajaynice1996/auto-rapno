@@ -1,0 +1,7 @@
+label,ensemble,n_models,rule,pool_type,n_cases,Dice,IoU,HD,HD95,both_empty_cases,one_empty_cases,variation_threshold,avg_variation,union_selected_cases,intersection_selected_cases
+CC,ResEncL+MedNeXt_k5_raw+MedNeXt_k5_pp,3,adaptive_nogt_variation,all_classes_only,52,0.6332372483660277,0.5976663621354129,,,22,9,0.28,0.29438700420276,42.0,10.0
+ED,PrimusV3S+MedNeXt_k5_raw+MedNeXt_k5_pp,3,adaptive_nogt_variation,all_classes_only,52,0.6849080977115999,0.6522992663296541,,,29,11,0.18,0.16102053359303184,50.0,2.0
+ET,ResEncL+PrimusV2S+ET500_ResEncL,3,adaptive_nogt_variation,all_plus_et,52,0.6725271719907278,0.5901854184122558,,,9,7,0.18,0.43222709672685267,52.0,0.0
+NET,ResEncL+MedNeXt_k3_pp+MedNeXt_k5_pp,3,adaptive_nogt_variation,all_classes_only,52,0.7506365023091438,0.6562482788155257,,,0,0,0.28,0.30591529742993606,20.0,32.0
+TC,nnUNet+PrimusV3S+MedNeXt_k3_raw+MedNeXt_k5_raw,4,adaptive_nogt_variation,all_classes_only,52,0.876303433872557,0.8000816517789293,,,0,0,0.34,0.1910611550964245,8.0,44.0
+WT,MedNeXt_k3_pp+MedNeXt_k5_raw+MedNeXt_k5_pp,3,adaptive_nogt_variation,all_classes_only,52,0.8951995130397393,0.8219804290982666,,,0,0,0.4,0.08647381295445437,2.0,50.0

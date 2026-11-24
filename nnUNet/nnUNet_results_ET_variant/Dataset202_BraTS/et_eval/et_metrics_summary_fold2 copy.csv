@@ -1,0 +1,2 @@
+model,num_cases,mean_dice,std_dice,mean_iou,std_iou
+nnUNet_PrimusV3S_Trainer__nnUNetResEncUNetLPlans__3d_fullres,52,0.6443443167113629,0.3771625981672571,0.5738569144828024,0.35898711601188266

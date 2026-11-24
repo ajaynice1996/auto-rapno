@@ -1,0 +1,1 @@
+# This model trained using the ET class only and T1ce modality only for evaluation.

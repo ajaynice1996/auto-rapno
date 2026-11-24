@@ -1,0 +1,2 @@
+ensemble,n_models,n_cases,Dice,IoU,HD,HD95,both_empty_cases,one_empty_cases
+ResEncL+PrimusV2S+MedNeXt_k5,3,52,0.7391585270526365,0.6757385188904862,,,57,28

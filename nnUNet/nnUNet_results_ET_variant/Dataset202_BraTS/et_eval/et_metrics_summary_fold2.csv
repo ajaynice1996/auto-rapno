@@ -1,0 +1,2 @@
+model,num_cases,mean_dice,std_dice,mean_iou,std_iou
+nnUNetTrainer__nnUNetResEncUNetLPlans__3d_fullres1,52,0.5513633121603455,0.38337828115997385,0.47249451361992684,0.35146514519382904

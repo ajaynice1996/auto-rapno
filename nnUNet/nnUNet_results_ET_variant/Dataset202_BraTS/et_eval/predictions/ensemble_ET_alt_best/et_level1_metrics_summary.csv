@@ -1,0 +1,2 @@
+num_cases,mean_dice,std_dice,mean_iou,std_iou,mean_hd95_mm,std_hd95_mm,hd95_nan_cases,rule_if_overlap_lt,rule_if_vol_diff_gt,rule_otherwise,threshold_overlap,threshold_vol_diff,source_a,source_b
+52,0.6873232221820424,0.3722379724681575,0.6241952452059951,0.3594627562049697,2.004640651349873,2.8293506998541345,10,I,U,A,0.05,0.1,nnUNet_results/Dataset202_BraTS/nnUNetTrainer_500epochs__nnUNetResEncUNetLPlans__3d_fullres/fold_2/validation,nnUNet_results_ET_variant/Dataset202_BraTS/et_eval/predictions/nnUNet_PrimusV3S_Trainer__nnUNetResEncUNetLPlans__3d_fullres

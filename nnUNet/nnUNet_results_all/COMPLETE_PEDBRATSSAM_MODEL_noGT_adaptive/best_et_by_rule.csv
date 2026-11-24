@@ -1,0 +1,4 @@
+rule,ensemble,n_models,label,pool_type,n_cases,Dice,IoU,HD,HD95,both_empty_cases,one_empty_cases,variation_threshold,avg_variation,union_selected_cases,intersection_selected_cases
+adaptive_nogt_variation,ResEncL+PrimusV2S+ET500_ResEncL,3,ET,all_plus_et,52,0.6725271719907278,0.5901854184122558,,,9,7,0.18,0.43222709672685267,52.0,0.0
+intersection,ResEncL+MedNeXt_k5_pp+ETvar_ResEncL_A,3,ET,all_plus_et,52,0.6570358192186325,0.5942127996359117,,,11,9,,,,
+union,ResEncL+PrimusV2S+ET500_ResEncL,3,ET,all_plus_et,52,0.6725271719907278,0.5901854184122558,,,9,7,,,,
