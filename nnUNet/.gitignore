@@ -116,3 +116,9 @@ ENV/
 
 !documentation/assets/scribble_example.png
 
+
+# SynthSeg pretrained model weights
+external/SynthSeg/models/
+
+# SynthSeg Python environment
+external/SynthSeg/.venv_synthseg/
