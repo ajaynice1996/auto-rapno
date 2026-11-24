@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brain MRI Tumor Segmentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .animate-spin-slow {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-700 to-purple-800 text-gray-800"
+  >
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+      <div class="text-center mb-8 text-white">
+        <h1 class="text-3xl font-bold mb-2">
+          <img
+            src="/static/images/brain-icon.png"
+            alt="Icon"
+            class="w-16 h-16 inline-block"
+          />
+          Brain MRI Tumor Segmentation
+        </h1>
+        <p class="text-lg">Upload a brain MRI image for tumor detection</p>
+      </div>
+
+      <div class="bg-white bg-opacity-95 rounded-xl p-6 shadow-lg">
+        {% if not (original_img and overlayed_img) %}
+        <form
+          id="uploadForm"
+          action="/"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div
+            class="border-2 border-dashed border-blue-400 rounded-xl p-6 text-center mb-4"
+            id="uploadSection"
+          >
+            <input
+              type="file"
+              name="image"
+              id="imageInput"
+              class="hidden"
+              accept="image/png,image/jpeg"
+              required
+            />
+            <button
+              type="button"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium"
+              onclick="document.getElementById('imageInput').click()"
+            >
+              Choose File
+            </button>
+            <p class="text-sm text-gray-600 mt-2">
+              Supported formats: PNG, JPG
+            </p>
+          </div>
+
+          <div id="previewSection" class="hidden text-center">
+            <div class="bg-gray-100 rounded-xl p-4 max-w-md mx-auto">
+              <img
+                id="previewImage"
+                class="w-full h-48 object-contain rounded-lg"
+                alt="Preview"
+              />
+            </div>
+            <button
+              type="submit"
+              class="bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-medium mt-4"
+            >
+              Analyze & Segment Tumor
+            </button>
+          </div>
+        </form>
+        {% endif %}
+
+        <div id="loadingSection" class="hidden text-center py-6">
+          <div
+            class="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin-slow mx-auto mb-3"
+          ></div>
+          <p>Processing MRI image...</p>
+        </div>
+
+        {% if original_img and overlayed_img %}
+        <div id="resultsSection" class="mt-6">
+          <h2 class="text-2xl font-bold text-center mb-6">Results</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow">
+              <h3 class="text-lg font-semibold text-center mb-2">
+                Original Image
+              </h3>
+              <div
+                class="h-48 flex items-center justify-center bg-gray-100 rounded-lg"
+              >
+                <img
+                  src="{{ original_img }}"
+                  class="max-h-full max-w-full object-contain"
+                  alt="Original MRI"
+                />
+              </div>
+              <a
+                href="{{ original_img }}"
+                download
+                class="block bg-red-500 text-white px-4 py-2 rounded-lg text-sm mt-2 text-center"
+              >
+                Download
+              </a>
+            </div>
+
+            <div class="bg-white rounded-xl p-4 shadow">
+              <h3 class="text-lg font-semibold text-center mb-2">
+                Segmentation
+              </h3>
+              <div
+                class="h-48 flex items-center justify-center bg-gray-100 rounded-lg"
+              >
+                <img
+                  src="{{ overlayed_img }}"
+                  class="max-h-full max-w-full object-contain"
+                  alt="Segmented MRI"
+                />
+              </div>
+              <a
+                href="{{ overlayed_img }}"
+                download
+                class="block bg-red-500 text-white px-4 py-2 rounded-lg text-sm mt-2 text-center"
+              >
+                Download
+              </a>
+            </div>
+          </div>
+
+          {% if stats %}
+          <div class="bg-blue-600 text-white rounded-xl p-4 text-center mb-4">
+            <h3 class="text-xl font-bold mb-3">Analysis Results</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-white bg-opacity-10 rounded-lg p-2">
+                <div class="font-bold">{{ stats.tumor_area }}%</div>
+                <div class="text-xs">Tumor Area</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-2">
+                <div class="font-bold">{{ stats.confidence }}%</div>
+                <div class="text-xs">Confidence</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-2">
+                <div class="font-bold">{{ stats.processing_time }}s</div>
+                <div class="text-xs">Processing Time</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-2">
+                <div class="font-bold">{{ stats.resolution }}</div>
+                <div class="text-xs">Resolution</div>
+              </div>
+            </div>
+          </div>
+          {% endif %} {% if not clinical_report %}
+          <form
+            method="POST"
+            action="/generate_report"
+            onsubmit="showReportLoading()"
+            class="text-center"
+          >
+            <input type="hidden" name="image_id" value="{{ image_id }}" />
+            <button
+              type="submit"
+              class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-6 py-3 rounded-lg mt-4"
+            >
+              📝 Generate Clinical Report
+            </button>
+          </form>
+          {% endif %} {% if clinical_report %}
+          <section
+            class="mt-6 p-6 bg-white border border-gray-300 rounded-lg shadow-md max-w-4xl mx-auto"
+          >
+            <h3 class="text-xl font-bold text-gray-900 mb-4">
+              Clinical Report
+            </h3>
+            <div
+              class="whitespace-pre-wrap text-gray-700 leading-relaxed text-base"
+            >
+              {{ clinical_report }}
+            </div>
+          </section>
+          {% endif %}
+
+          <a
+            href="/"
+            class="block bg-gray-600 text-white px-6 py-2 rounded-lg text-center mt-6"
+          >
+            Analyze Another
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      {% if error %}
+      <div
+        class="bg-red-100 text-red-700 p-3 rounded mb-4 text-center font-semibold"
+      >
+        {{ error }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div
+      id="reportLoadingOverlay"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div
+          class="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4 mx-auto"
+        ></div>
+        <p class="text-gray-800 font-semibold">Generating Clinical Report...</p>
+        <p class="text-gray-600 font-semibold">This may take few minutes...</p>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            document.getElementById("previewImage").src = e.target.result;
+            document
+              .getElementById("previewSection")
+              .classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        });
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", function () {
+          document.getElementById("loadingSection").classList.remove("hidden");
+        });
+      function showReportLoading() {
+        document
+          .getElementById("reportLoadingOverlay")
+          .classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>
