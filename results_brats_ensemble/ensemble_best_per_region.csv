@@ -1,0 +1,7 @@
+ensemble,n_models,label,n_cases,Dice,IoU,HD,HD95
+ResEncL+PrimusV2S+PrimusV3S+MedNeXt_k3,4,ET,52,0.6796,0.6060,19.0764,3.5048
+ResEncL+PrimusV3S+MedNeXt_k3+MedNeXt_k5,4,NET,52,0.7521,0.6623,19.2708,7.7515
+ResEncL+PrimusV2S+MedNeXt_k3,3,CC,52,0.6509,0.6230,11.8961,3.7927
+PrimusV3S+MedNeXt_k3+MedNeXt_k5,3,ED,52,0.6829,0.6508,8.0314,4.7368
+nnUNet+ResEncL+MedNeXt_k3,3,TC,52,0.8788,0.8045,31.4533,6.9386
+nnUNet+ResEncL+MedNeXt_k3,3,WT,52,0.9045,0.8365,30.8855,6.0079
