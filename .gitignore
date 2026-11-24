@@ -267,3 +267,4 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 med-sam-brain/Miniconda3-latest-Linux-x86_64.sh
+/nnUNet/REPORTS/
