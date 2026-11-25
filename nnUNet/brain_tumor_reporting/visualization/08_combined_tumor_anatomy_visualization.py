@@ -359,28 +359,46 @@ def main(subject):
         vmin, vmax = 0, 1
 
     # Create figure
-    fig = plt.figure(figsize=(21, 13))
+    # Create a larger figure with two MRI comparison rows and a table
+    fig = plt.figure(figsize=(19, 12.5))
 
     gs = fig.add_gridspec(
-        2,
         3,
-        height_ratios=[3.2, 1.3],
-        hspace=0.25,
-        wspace=0.08,
-        top=0.86,
+        3,
+        height_ratios=[1.0, 1.0, 0.55],
+        hspace=0.20,
+        wspace=0.06,
+        top=0.79,
+        bottom=0.075,
+        left=0.045,
+        right=0.97,
     )
 
-    axes = [
+    # Row 1: Original T1n without segmentation
+    axes_original = [
         fig.add_subplot(gs[0, i])
         for i in range(3)
     ]
 
+    # Row 2: T1n with tumor and anatomical overlap
+    axes_overlay = [
+        fig.add_subplot(gs[1, i])
+        for i in range(3)
+    ]
+
     # Draw axial, coronal, sagittal views
-    for ax, (orientation, index) in zip(
-        axes,
+    # ============================================================
+    # ROW 1: ORIGINAL T1 MRI WITHOUT TUMOR OR ANATOMY OVERLAY
+    # ROW 2: SAME T1 MRI WITH TUMOR + ANATOMICAL OVERLAP
+    # ============================================================
+
+    for ax_original, ax_overlay, (orientation, index) in zip(
+        axes_original,
+        axes_overlay,
         orientations,
     ):
 
+        # Extract identical slices for both rows
         t1_plane = extract_plane(
             t1,
             orientation,
@@ -399,8 +417,31 @@ def main(subject):
             index,
         )
 
-        # T1 background
-        ax.imshow(
+        # --------------------------------------------------------
+        # ROW 1: Original T1n MRI
+        # --------------------------------------------------------
+
+        ax_original.imshow(
+            t1_plane,
+            cmap="gray",
+            origin="lower",
+            vmin=vmin,
+            vmax=vmax,
+        )
+
+        ax_original.set_title(
+            f"Original T1n — {orientation} slice {index}",
+            fontsize=12,
+            fontweight="bold",
+        )
+
+        ax_original.axis("off")
+
+        # --------------------------------------------------------
+        # ROW 2: Tumor segmentation + anatomical boundaries
+        # --------------------------------------------------------
+
+        ax_overlay.imshow(
             t1_plane,
             cmap="gray",
             origin="lower",
@@ -409,19 +450,19 @@ def main(subject):
         )
 
         # Tumor segmentation overlay
-        ax.imshow(
+        ax_overlay.imshow(
             make_tumor_overlay(tumor_plane),
             origin="lower",
         )
 
-        # Anatomical boundaries
+        # SynthSeg anatomical boundaries
         for label_id, (name, color) in ANATOMY_LABELS.items():
 
             mask = anatomy_plane == label_id
 
             if np.any(mask):
 
-                ax.contour(
+                ax_overlay.contour(
                     mask.astype(float),
                     levels=[0.5],
                     colors=[color],
@@ -429,12 +470,13 @@ def main(subject):
                     origin="lower",
                 )
 
-        ax.set_title(
-            f"{orientation} — slice {index}",
+        ax_overlay.set_title(
+            f"Tumor + anatomical overlap — {orientation} slice {index}",
             fontsize=12,
+            fontweight="bold",
         )
 
-        ax.axis("off")
+        ax_overlay.axis("off")
 
     # Tumor and anatomy legends
     tumor_handles = [
@@ -460,7 +502,7 @@ def main(subject):
     fig.legend(
         handles=tumor_handles + anatomy_handles,
         loc="upper center",
-        bbox_to_anchor=(0.5, 0.875),
+        bbox_to_anchor=(0.5, 0.845),
         ncol=9,
         fontsize=9,
         frameon=True,
@@ -473,7 +515,7 @@ def main(subject):
     )
 
     # Quantitative anatomical overlap table
-    table_ax = fig.add_subplot(gs[1, :])
+    table_ax = fig.add_subplot(gs[2, :])
 
     add_quantitative_table(
         table_ax,
